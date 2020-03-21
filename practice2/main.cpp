@@ -3,11 +3,11 @@
 #include <cstring>
 #include <string>
 
-void calculateZFunction(char* s, int size, int* result) {
-    int lastBiggestSuffix = 0;
+void calculateZFunction(char* s, size_t size, size_t* result) {
+    size_t lastBiggestSuffix = 0;
     result[0] = 0;
-    for (int i = 1; i < size; i++) {
-        result[i] = std::max(0, std::min(result[i - lastBiggestSuffix], lastBiggestSuffix + result[lastBiggestSuffix] - i));
+    for (size_t i = 1; i < size; i++) {
+        result[i] = std::max(0, std::min((int) result[i - lastBiggestSuffix], (int) (lastBiggestSuffix + result[lastBiggestSuffix] - i)));
         if (i + result[i] >= lastBiggestSuffix + result[lastBiggestSuffix]) {
             lastBiggestSuffix = i;
             while (result[lastBiggestSuffix] < size && s[result[lastBiggestSuffix]] == s[result[lastBiggestSuffix] + lastBiggestSuffix]) {
@@ -18,12 +18,12 @@ void calculateZFunction(char* s, int size, int* result) {
 }
 
 // calculates zFunction based on firstS...s[0..s.size - firstS.size - 1] string
-void calculateZFunction(char* firstS, int firstSize, char* s, int size, int* firstBlock, int* result, std::pair<int, int>* lastBlockSuffix) {
+void calculateZFunction(char* firstS, size_t firstSize, char* s, size_t size, size_t* firstBlock, size_t* result, std::pair<int, size_t>* lastBlockSuffix) {
     int lastBiggestSuffix = lastBlockSuffix->first;
-    for (int i = 0; i <= size - firstSize; i++) {
-        int lastBiggestSuffixValue = lastBiggestSuffix == lastBlockSuffix->first ? lastBlockSuffix->second : result[lastBiggestSuffix];
-        result[i] = std::max(0, std::min(i - lastBiggestSuffix < firstSize ? firstBlock[i - lastBiggestSuffix] : 0, 
-                               lastBiggestSuffix + lastBiggestSuffixValue - i));
+    for (size_t i = 0; i <= size - firstSize; i++) {
+        size_t lastBiggestSuffixValue = lastBiggestSuffix == lastBlockSuffix->first ? lastBlockSuffix->second : result[lastBiggestSuffix];
+        result[i] = std::max(0, std::min((int) i - lastBiggestSuffix < firstSize ? (int) firstBlock[i - lastBiggestSuffix] : 0, 
+                               (int) (lastBiggestSuffix + lastBiggestSuffixValue - i)));
         if (i + result[i] >= lastBiggestSuffix + lastBiggestSuffixValue) {
             lastBiggestSuffix = i;
             while (lastBiggestSuffix + result[lastBiggestSuffix] < size 
@@ -46,19 +46,15 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
-    int substringSize = 0;
-    while (argv[1][substringSize] != '\0') {
-        substringSize++;
-    }
+    size_t substringSize = strlen(argv[1]);
+    const size_t bufferSize = substringSize * 4;
 
-    const int bufferSize = substringSize * 4;
-
-    int firstBlockZFunction[substringSize];
+    size_t firstBlockZFunction[substringSize];
     calculateZFunction(argv[1], substringSize, firstBlockZFunction);
 
-    std::pair<int, int> biggestSuffix = {0, 0};
+    std::pair<int, size_t> biggestSuffix = {0, 0};
     char buffer[bufferSize];
-    int zFunction[bufferSize];
+    size_t zFunction[bufferSize];
 
     FILE* f = fopen(argv[2], "r");
     if (!f) {
@@ -91,19 +87,19 @@ int main(int argc, char* argv[]) {
             buffer, bytesInBuffer, 
             firstBlockZFunction,
             zFunction, &biggestSuffix);
-        for (int i = 0; i <= bytesInBuffer - substringSize; i++) {
+        for (size_t i = 0; i <= bytesInBuffer - substringSize; i++) {
             contains = contains || zFunction[i] >= substringSize;
         }
         
         biggestSuffix.first += substringSize;
-        for (int i = bufferSize - substringSize; i < bufferSize; i++) {
+        for (size_t i = bufferSize - substringSize; i < bufferSize; i++) {
             buffer[i - (bufferSize - substringSize)] = buffer[i];
         }
     }
     fclose(f);
 
-    size_t bytes_written = fwrite(contains ? "true\n" : "false\n", sizeof(char), contains ? 5 : 6, stdout);
-    if (bytes_written == 0) {
+    size_t bytesWritten = fwrite(contains ? "true\n" : "false\n", sizeof(char), contains ? 5 : 6, stdout);
+    if (bytesWritten == 0) {
         perror("fwrite failed");
         return EXIT_FAILURE;
     }
