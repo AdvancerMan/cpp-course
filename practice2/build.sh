@@ -1,7 +1,9 @@
 #!/bin/bash
 
 DIR=$(dirname "$0")
-echo g++ -std=c++17 -o $DIR/out $DIR/main.cpp
-g++ -std=c++17 -o $DIR/out $DIR/main.cpp
+mkdir $DIR/out
+
+echo g++ -std=c++17 -o $DIR/out/main $DIR/main.cpp
+g++ -std=c++17 -o $DIR/out/main $DIR/main.cpp
 
 

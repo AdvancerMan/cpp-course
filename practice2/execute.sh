@@ -6,6 +6,6 @@ if [ -z "$1" ] ; then
     exit 1
 fi
 
-echo $DIR/out \"$1\" $DIR/input.txt
-$DIR/out "$1" $DIR/input.txt
+echo $DIR/out/main \"$1\" $DIR/input.txt
+$DIR/out/main "$1" $DIR/input.txt
 
