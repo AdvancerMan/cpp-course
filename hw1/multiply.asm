@@ -162,7 +162,7 @@ sub_long_long:
 ;    rcx -- length of long number in qwords
 ; result:
 ;    product is written to rdi
-;    result can have length 2 * rcx
+;    result length is 2 * rcx
 mul_long_long:
                 shl             rcx, 1
                 call            set_zero
@@ -170,8 +170,10 @@ mul_long_long:
                 
                 cmp             rcx, 8
                 jl              mul_long_long_naive
-                ;call            mul_karatsuba
-                ;ret
+                
+                ; isn't implemented now
+                ; call            mul_karatsuba
+                ; ret
 mul_long_long_naive:
                 call            mul_naive
                 ret
@@ -183,8 +185,59 @@ mul_long_long_naive:
 ;    rcx -- length of long number in qwords
 ; result:
 ;    product is written to rdi
-;    result can have length 2 * rcx
+;    result length is 2 * rcx
 mul_karatsuba:
+; A0 * B0 + ((A0 + A1) * (B0 + B1) - A0 * B0 - A1 * B1) * SHIFT + A1 * B1 * SHIFT ^ 2
+                push            rdi
+                mov             r8, rcx
+                mov             r9, rcx
+                mov             r10, rcx
+		lea		r10, [r10 * 8 + 8]
+                shr             r8, 1
+                sub             r9, r8
+                
+                ; A0 * B0
+                sub             rsp, r10
+                mov             rdi, rsp
+                mov             rcx, r8
+                call            mul_long_long
+                mov             r11, rdi
+                
+                ; A1 * B1
+                sub             rsp, r10
+                mov             rdi, rsp
+                mov             rcx, r9
+                lea             rsi, [rsi + r8 * 8]
+                lea             rbx, [rbx + r8 * 8]
+                call            mul_long_long
+                ; lea             rsi, [rsi - r8 * 8]
+                ; lea             rbx, [rbx - r8 * 8]
+                mov             r12, rdi
+                
+                ; (A0 + A1) * (B0 + B1)
+                sub             rsp, r10
+                
+                ; A0 + A1
+                lea             r9, [r9 * 8 + 8]
+                sub             rsp, r9
+                shr             r9, 3
+                
+                mov             rdi, rsp
+                mov             rcx, r9
+                call            set_zero
+		
+		lea             rsi, [rsi + r8 * 8]
+                lea             rbx, [rbx + r8 * 8]
+                call            mul_long_long
+                ; lea             rsi, [rsi - r8 * 8]
+                ; lea             rbx, [rbx - r8 * 8]
+                mov             r12, rdi
+                
+                
+                
+                ; B0 + B1
+                
+                
                 ret
 
 
@@ -194,7 +247,7 @@ mul_karatsuba:
 ;    rcx -- length of long number in qwords
 ; result:
 ;    product is written to rdi
-;    result can have length 2 * rcx
+;    result length is 2 * rcx
 mul_naive:
                 push            rdi
                 

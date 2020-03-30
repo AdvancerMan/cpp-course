@@ -62,7 +62,8 @@ LR = [
     (-19, -20),
     (-49, -50),
     (-99, -100),
-    (-999, -1000)
+    (-999, -1000),
+    (-1999, -2000),
 ]
 
 tests = [
@@ -93,12 +94,12 @@ try:
             if not isfile(buildFile):
                 print("Build script should be placed near testScript.py")
                 failed = True
-                break
+                continue
             system(buildFile)
             if not isfile(fileName):
                 print("File " + fileName + " still doesn't exist. Try build it by yourself.")
                 failed = True
-                break
+                continue
         print("Testing " + fileName + " with " + operator['str'])
         
         for tst in tests:
