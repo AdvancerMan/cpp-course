@@ -164,92 +164,21 @@ sub_long_long:
 ;    product is written to rdi
 ;    result length is 2 * rcx
 mul_long_long:
+                push            rdi
+                push            rax
+                push            rdx
+                push            r8
+                push            r9
+                push            r10
+                push            r11
+                push            r12
+                push            r13
+                push            r14
+                push            r15
+
                 shl             rcx, 1
                 call            set_zero
                 shr             rcx, 1
-                
-                cmp             rcx, 8
-                jl              mul_long_long_naive
-                
-                ; isn't implemented now
-                ; call            mul_karatsuba
-                ; ret
-mul_long_long_naive:
-                call            mul_naive
-                ret
-
-
-; multiplies long number by a long number by karatsuba algorithm
-;    rsi -- address of multiplier #1 (unsigned long number)
-;    rbx -- address of multiplier #2 (unsigned long number)
-;    rcx -- length of long number in qwords
-; result:
-;    product is written to rdi
-;    result length is 2 * rcx
-mul_karatsuba:
-; A0 * B0 + ((A0 + A1) * (B0 + B1) - A0 * B0 - A1 * B1) * SHIFT + A1 * B1 * SHIFT ^ 2
-                push            rdi
-                mov             r8, rcx
-                mov             r9, rcx
-                mov             r10, rcx
-		lea		r10, [r10 * 8 + 8]
-                shr             r8, 1
-                sub             r9, r8
-                
-                ; A0 * B0
-                sub             rsp, r10
-                mov             rdi, rsp
-                mov             rcx, r8
-                call            mul_long_long
-                mov             r11, rdi
-                
-                ; A1 * B1
-                sub             rsp, r10
-                mov             rdi, rsp
-                mov             rcx, r9
-                lea             rsi, [rsi + r8 * 8]
-                lea             rbx, [rbx + r8 * 8]
-                call            mul_long_long
-                ; lea             rsi, [rsi - r8 * 8]
-                ; lea             rbx, [rbx - r8 * 8]
-                mov             r12, rdi
-                
-                ; (A0 + A1) * (B0 + B1)
-                sub             rsp, r10
-                
-                ; A0 + A1
-                lea             r9, [r9 * 8 + 8]
-                sub             rsp, r9
-                shr             r9, 3
-                
-                mov             rdi, rsp
-                mov             rcx, r9
-                call            set_zero
-		
-		lea             rsi, [rsi + r8 * 8]
-                lea             rbx, [rbx + r8 * 8]
-                call            mul_long_long
-                ; lea             rsi, [rsi - r8 * 8]
-                ; lea             rbx, [rbx - r8 * 8]
-                mov             r12, rdi
-                
-                
-                
-                ; B0 + B1
-                
-                
-                ret
-
-
-; multiplies long number by a long number by naive algorithm
-;    rsi -- address of multiplier #1 (unsigned long number)
-;    rbx -- address of multiplier #2 (unsigned long number)
-;    rcx -- length of long number in qwords
-; result:
-;    product is written to rdi
-;    result length is 2 * rcx
-mul_naive:
-                push            rdi
                 
                 mov             r9, rcx
                 mov             r11, rsi
@@ -285,8 +214,27 @@ mul_naive:
                 dec             r9
                 jnz             .loop1
                 
+                pop             r15
+                pop             r14
+                pop             r13
+                pop             r12
+                pop             r11
+                pop             r10
+                pop             r9
+                pop             r8
+                pop             rdx
+                pop             rax
                 pop             rdi
                 ret
+
+; multiplies long number by a long number by naive algorithm
+;    rsi -- address of multiplier #1 (unsigned long number)
+;    rbx -- address of multiplier #2 (unsigned long number)
+;    rcx -- length of long number in qwords
+; result:
+;    product is written to rdi
+;    result length is 2 * rcx
+mul_naive:
 
 
 ; assigns a zero to long number
